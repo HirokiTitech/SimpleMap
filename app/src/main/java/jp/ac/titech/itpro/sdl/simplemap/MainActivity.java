@@ -10,6 +10,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -26,13 +28,24 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends AppCompatActivity implements
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, View.OnClickListener {
     private final static String TAG = "MainActivity";
 
     private GoogleMap googleMap;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private boolean requestingLocationUpdate;
+    private Button placeButton;
+    private int flag;
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.buttonPlace:
+                flag = 1;
+                break;
+        }
+    }
 
     private enum UpdatingState {STOPPED, REQUESTING, STARTED}
 
@@ -67,6 +80,10 @@ public class MainActivity extends AppCompatActivity implements
         locationRequest.setInterval(10000);
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        placeButton = (Button)findViewById(R.id.buttonPlace);
+        placeButton.setOnClickListener(this);
+        flag = 0;
     }
 
     @Override
@@ -121,8 +138,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLocationChanged(Location location) {
         Log.d(TAG, "onLocationChanged: " + location);
-        googleMap.animateCamera(CameraUpdateFactory
-                .newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+        if(flag == 1) {
+            googleMap.animateCamera(CameraUpdateFactory
+                    .newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+            flag = 0;
+        }
     }
 
     @Override
